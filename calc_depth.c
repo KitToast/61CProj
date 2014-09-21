@@ -13,7 +13,8 @@
 
 static int squared_euclidean_distance(unsigned char *, unsigned char *, int, int);
 static unsigned char *populate_feature_patch(int, int, int, unsigned char*);
-static unsigned char *check_bounds(unsigned char *, int, int, int, int, int); //Checks if a features pixels will be in bounds 
+static unsigned char *check_bounds(unsigned char *, int, int, int, int, int); //Checks if a features pixels will be in bounds
+static int check_within_image(int, int, int, int, int); 
 static int return_feature_bounds(int, int, int);
 static unsigned char scan_right_image(unsigned char *, unsigned char *, int, int, int, int, int, int, int, int);
 
@@ -76,26 +77,24 @@ unsigned char scan_right_image(unsigned char *image,
 		int search_field_height,
 		int max_displacement) {
 
-	int search_area_offset = return_feature_bounds(search_field_width, 
+	int search_area_offset = (pixel_offset - return_feature_bounds(search_field_width, 
 						       search_field_height, 
-						       image_width); //Find offset of starting position of search area. This is create a search field around the pixel. 
+						       image_width)); //Find offset of starting position of search area. This is create a search field around the pixel. 
 
 	int most_similar_distance, height_offset, width_offset, distance_to_examine; //Keeps most similar distance at any given time.
 	int most_similar_offset, current_offset; //Will contain the offset  
-	unsigned char feature_to_examine; //Points to most similar feature at any given time and the feature to be examined.
+	unsigned char *feature_to_examine; //Points to most similar feature at any given time and the feature to be examined.
 	
 	for(int i = 0; i < search_field_height; i++) {
 	   height_offset = search_field_width * i;
-	   for(int j = 0; j < search_field_width; j++) {
+	   for(int j = 0; j < search_field_width; j++) `{
 	       width_offset = height_offset + j; 
 
 	       current_offset = search_area_offset + width_offset;
-               feature_to_examine = check_bounds(image, 
-						 current_offset,
-						 feature_patch_width,
-					         feature_patch_height,
-						 image_width,
-						 image_height);
+
+	       int within_image = check_within_image(current_offset, feature_patch_width, feature_patch_height, image_width, image_height);
+               feature_to_examine = (within_image) ? populate_feature_patch(feature_patch_height, feature_patch_width, current_offset, image) : NULL;
+
 	       if(feature_to_examine) { //If not null
 	           if((distance_to_examine = squared_euclidean_distance(feature_to_examine, 
 					         left_feature,
@@ -108,18 +107,18 @@ unsigned char scan_right_image(unsigned char *image,
 		       free(feature_to_examine); //No need for feature anymore
 	       }  
 	   } //End of for loop
+	}
+	int similar_y = most_similar_offset / image_width; //Calculate the x difference and y difference
+	int similar_x = most_similar_offset - (similar_y * image_width);
 
-	   int current_y = current_offset / image_width; //Calculate the x difference and y difference
-	   int current_x = current_offset - (current_y * image_width);
+	int left_pixel_y = pixel_offset / image_width;
+	int left_pixel_x = pixel_offset  - (left_pixel_y * image_width);
 
-	   int left_pixel_y = pixel_offset / image_width;
-	   int left_pixel_x = pixel_offset  - (left_pixel_y * image_width);
+	int dy = abs(similar_y - left_pixel_y);
+	int dx = abs(similar_x - left_pixel_x);
 
-	   int dy = abs(current_y - left_pixel_y);
-	   int dx = abs(current_x - left_pixel_x);
-
-	  return normalized_displacement(dx, dy, max_displacement); //max_displacement passed in as args. 
-      }	
+	return normalized_displacement(dx, dy, max_displacement); //max_displacement passed in as args. 
+      	
 }
 
 unsigned char *check_bounds(unsigned char *image, 
@@ -132,16 +131,25 @@ unsigned char *check_bounds(unsigned char *image,
 	int diagonal_offset = return_feature_bounds(feature_patch_width, feature_patch_height, image_width); //find how many places to decrease from position.
 	int corner_offset = pixel_offset - diagonal_offset; //Distance from image pointer (first pixel) to corner of the feature. 
 
-	
-	if(corner_offset < 0) { //If the corner itself is out of bounds, the entire feature will be out of bounds.
-		return NULL;
+	int within_image = check_within_image(corner_offset, feature_patch_width, feature_patch_height, image_width, image_height);
+	return (within_image) ? populate_feature_patch(feature_patch_height, feature_patch_width, corner_offset, image) : NULL; //Create the feature if the feature is within bounds.		
+ 
+}
+
+/*
+Checks if a feature whose upper left corner at starting_point_offset is within the bounds of the image.
+*/
+int check_within_image(int starting_point_offset, int feature_patch_width, int feature_patch_height, int image_width, int image_height) {
+
+	if(starting_point_offset < 0) { //If the corner itself is out of bounds, the entire feature will be out of bounds.
+		return 0;
 	}
 
-	if(( ((corner_offset + feature_patch_width - 1) < ((diagonal_offset / image_width + 1)) * image_width) && //Esstentially checking if adding the feature width will make it overlap to the next row. If so, this feature is out of bounds
-	     ((corner_offset + (feature_patch_height * feature_patch_width - 1) ) < (image_width * image_height)))) { //Essentially cheecking if the feature height is within bounds. If is within bounds. This means the 
-		return populate_feature_patch(feature_patch_height, feature_patch_width, corner_offset, image); //Create the feature if the feature is within bounds.		
+	if(( ((starting_point_offset + feature_patch_width - 1) < ((starting_point_offset / image_width + 1)) * image_width) && //Esstentially checking if adding the feature width will make it overlap to the next row. If so, this feature is out of bounds
+	     ((starting_point_offset + (feature_patch_height * feature_patch_width - 1) ) < (image_width * image_height)))) { //Essentially cheecking if the feature height is within bounds. If is within bounds. This means the 
+        	return 1;
 	}
-	return NULL; //Return if out of bounds
+	return 0;
 }
 
 int return_feature_bounds(int feature_patch_width, int feature_patch_height, int image_width) {
@@ -160,13 +168,11 @@ unsigned char *populate_feature_patch(int feature_patch_height,
 	unsigned char *feature_patch = (unsigned char *)malloc(feature_patch_height * feature_patch_width * sizeof(unsigned char)); //Malloc feature patch
 	int height_offset, width_offset;
 
-	int new_feature_pos = 0; //Keeps index of new feature to copy in during iteration
 	for(int i = 0; i < feature_patch_height; i++) {
 	    height_offset = feature_patch_width * i;
 	    for(int j = 0; j < feature_patch_width; j++) {
 	        width_offset = height_offset + j;
-		*(feature_patch + new_feature_pos) = *(starting_pos + width_offset); //Set values from image into new feature patch
-		new_feature_pos++;	
+		*(feature_patch + width_offset) = *(starting_pos + width_offset); //Set values from image into new feature patch
 	    }	    
 	}
 	return feature_patch;
