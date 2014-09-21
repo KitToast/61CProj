@@ -81,13 +81,18 @@ unsigned char scan_right_image(unsigned char *image,
 						       search_field_height, 
 						       image_width)); //Find offset of starting position of search area. This is create a search field around the pixel. 
 
-	int most_similar_distance, height_offset, width_offset, distance_to_examine; //Keeps most similar distance at any given time.
-	int most_similar_offset, current_offset; //Will contain the offset  
+	int most_similar_euclid_distance, height_offset, width_offset, distance_to_examine, most_similar_nordis; //Keeps most similar distance at any given time.
+	int current_offset; //Will contain the offset  
+
+	int left_pixel_y = pixel_offset / image_width;
+	int left_pixel_x = pixel_offset  - (left_pixel_y * image_width);
+
+	int current_y, current_x, dy, dx, nordis; //Fields to store most similar normal displacement and the fields required to calculate it.
 	unsigned char *feature_to_examine; //Points to most similar feature at any given time and the feature to be examined.
 	
 	for(int i = 0; i < search_field_height; i++) {
 	   height_offset = search_field_width * i;
-	   for(int j = 0; j < search_field_width; j++) `{
+	   for(int j = 0; j < search_field_width; j++) {
 	       width_offset = height_offset + j; 
 
 	       current_offset = search_area_offset + width_offset;
@@ -99,25 +104,29 @@ unsigned char scan_right_image(unsigned char *image,
 	           if((distance_to_examine = squared_euclidean_distance(feature_to_examine, 
 					         left_feature,
 						 feature_patch_width, 
-						 feature_patch_height)) < most_similar_distance) { //Set distance_to_examine as the euclidean distance between left feature and the right feature and compare between the most_similar_feature.
+						 feature_patch_height)) <= most_similar_euclid_distance) { //Set distance_to_examine as the euclidean distance between left feature and the right feature and compare between the most_similar_feature.
 
-		       most_similar_distance  = distance_to_examine;
-		       most_similar_offset = current_offset;
+		       	current_y = current_offset / image_width; //Calculate the x difference and y difference
+			current_x = current_offset - (current_y * image_width);
+
+			dy = abs(current_y - left_pixel_y);
+			dx = abs(current_x - left_pixel_x);
+
+			nordis = normalized_displacement(dx,dy, max_displacement);
+
+			if((distance_to_examine == most_similar_euclid_distance) && (nordis < most_similar_nordis)) {
+		   		most_similar_nordis = nordis; 	    		
+			} else {
+		       		most_similar_euclid_distance  = distance_to_examine;
+		       		most_similar_nordis = nordis;
+		   	} 
 		   } 
 		       free(feature_to_examine); //No need for feature anymore
 	       }  
 	   } //End of for loop
 	}
-	int similar_y = most_similar_offset / image_width; //Calculate the x difference and y difference
-	int similar_x = most_similar_offset - (similar_y * image_width);
 
-	int left_pixel_y = pixel_offset / image_width;
-	int left_pixel_x = pixel_offset  - (left_pixel_y * image_width);
-
-	int dy = abs(similar_y - left_pixel_y);
-	int dx = abs(similar_x - left_pixel_x);
-
-	return normalized_displacement(dx, dy, max_displacement); //max_displacement passed in as args. 
+	return most_similar_nordis; //max_displacement passed in as args. 
       	
 }
 
