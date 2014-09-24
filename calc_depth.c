@@ -77,19 +77,24 @@ unsigned char scan_right_image(unsigned char *image,
     
 	int most_similar_euclid_distance = INT_MAX, distance_to_examine;
 	int most_similar_nordis = INT_MAX; //Keeps most similar distance at any given time.
-	int current_offset; //Will contain the offset
+	int current_offset, height_offset; //Will contain the offset
     
 	int left_pixel_y = pixel_offset / image_width;
 	int left_pixel_x = pixel_offset  - (left_pixel_y * image_width);
     
 	int current_y, current_x, dy, dx, nordis; //Fields to store most similar normal displacement and the fields required to calculate it.
 	unsigned char *feature_to_examine; //Points to most similar feature at any given time and the feature to be examined.
+
 	
 	for(int i = 0; i < search_field_height; i++) {
-        current_offset = search_area_offset + image_width * i;
 	
-        for(int j = 0; j < search_field_width; j++) {
-                     
+        height_offset = search_area_offset + image_width * i;
+	current_offset = height_offset; 
+        for(int j = 0; j < search_field_width; j++, current_offset++) {
+            
+	     if(!(current_offset >= image_width * ((height_offset / image_width + i + 1)) || 
+	       (current_offset < (pixel_offset - ((search_field_height / 2) * image_width))))) { //Account for feature corner going off of right end and left
+         
             int within_image = check_within_image(current_offset, feature_patch_width, feature_patch_height, image_width, image_height);
             feature_to_examine = (within_image) ? populate_feature_patch(feature_patch_height, feature_patch_width, current_offset, image) : NULL;
             
@@ -110,15 +115,16 @@ unsigned char scan_right_image(unsigned char *image,
                     if((distance_to_examine == most_similar_euclid_distance) && (nordis < most_similar_nordis)) {
                         most_similar_nordis = nordis;
                     } else if (distance_to_examine != most_similar_euclid_distance) {
-                        most_similar_euclid_distance  = distance_to_examine;
+                        most_similar_euclid_distance = distance_to_examine;
                         most_similar_nordis = nordis;
                     }
                 }
                 free(feature_to_examine); //No need for feature anymore
             }
-            current_offset += 1;
-        } //End of for loop
-	}
+	  }
+        } //End of for loop 
+
+     }
     
 	return most_similar_nordis; //max_displacement passed in as args.
     
@@ -147,8 +153,8 @@ int check_within_image(int starting_point_offset, int feature_patch_width, int f
 		return 0;
 	}
     
-	if(( ((starting_point_offset + feature_patch_width - 1) <= ((starting_point_offset / image_width + 1)) * image_width) && //Essentially checking if adding the feature width will make it overlap to the next row. If so, this feature is out of bounds
-        ((starting_point_offset + (feature_patch_width * feature_patch_height - 1) ) <= (image_width * image_height )))) { //Essentially cheecking if the feature height is within bounds. If is within bounds. This means the @FIXME
+	if(( ((starting_point_offset + feature_patch_width - 1) < ((starting_point_offset / image_width + 1)) * image_width) && //Essentially checking if adding the feature width will make it overlap to the next row. If so, this feature is out of bounds
+        ((starting_point_offset + (feature_patch_width * feature_patch_height - 1) ) < (image_width * image_height )))) { //Essentially cheecking if the feature height is within bounds. If is within bounds. This means the @FIXME
         	return 1;
 	}
 	return 0;
@@ -168,6 +174,10 @@ unsigned char *populate_feature_patch(int feature_patch_height,
     
 	unsigned char *starting_pos = image + offset; //Start at position give by args
 	unsigned char *feature_patch = (unsigned char *)malloc(feature_patch_height * feature_patch_width * sizeof(unsigned char)); //Malloc feature patch
+	
+	if(!feature_patch)
+		allocation_failed();
+	
 	int height_offset, width_offset;
     
 	for(int i = 0; i < feature_patch_height; i++) {
