@@ -59,7 +59,9 @@ void calc_depth(unsigned char *depth_map, unsigned char *left,
             free(left_feature_patch); //Free left_feature for next iteration if we malloced a left feature.
     }
 }
-
+/*
+Checks if a feature patch centered at the pixel on (i,j) is within the image bounds
+*/
 
 unsigned char *check_bounds(unsigned char *image,
                             int height,
@@ -70,14 +72,16 @@ unsigned char *check_bounds(unsigned char *image,
                             int image_height) {
     
 
-	int corner_offset = coord_to_offset(height - (feature_patch_height / 2), //Should be only time corner is used.
-										width - (feature_patch_width / 2),
-										image_width); 
+	int corner_offset = coord_to_offset(height - (feature_patch_height / 2), 
+					    width - (feature_patch_width / 2),
+					    image_width); 
     
 	int within_image = check_within_image(height, width, feature_patch_width, feature_patch_height, image_width, image_height); //Checks if creating a feature centered around pixel at (height, width) work
 	return (within_image) ? populate_feature_patch(feature_patch_height, feature_patch_width, image_width, corner_offset, image) : NULL; //Create the feature if the feature is within bounds.
  }
-
+/*
+This function is responsible for creating the search field and scanning for the feature most similar to one in the left image. Returns the normalized distance between the left feature in question and the right feature most similar to it. 
+*/
 unsigned char scan_right_image(unsigned char *image,
                                unsigned char *left_feature,
                                int height,
@@ -121,18 +125,17 @@ unsigned char scan_right_image(unsigned char *image,
 			    
 			    nordis = normalized_displacement(dx,dy, max_displacement);
 			    
-			    if((distance_to_examine == most_similar_euclid_distance) && (nordis < most_similar_nordis)) {
+			    if((distance_to_examine == most_similar_euclid_distance) && (nordis < most_similar_nordis)) { //Update the normalized distance if a tie results.  
 				most_similar_nordis = nordis;
-			    } else if (distance_to_examine != most_similar_euclid_distance) {
+			    } else if (distance_to_examine != most_similar_euclid_distance) { 
 				most_similar_euclid_distance = distance_to_examine;
 				most_similar_nordis = nordis;
 			    }
 			}
 			free(feature_to_examine); //No need for feature anymore
 		}
-	  } //End of for loop 
-
-     }
+	  } //End of inner for loop 
+     } //End of outer for loop
     
 	return most_similar_nordis; //max_displacement passed in as args.
     
@@ -145,17 +148,16 @@ unsigned char scan_right_image(unsigned char *image,
 
 int check_within_image(int height, int width, int feature_patch_width, int feature_patch_height, int image_width, int image_height) {
     
-    //Top
 	if(((height - (feature_patch_height / 2))  < 0) || ((width - (feature_patch_width / 2)) < 0)) { 
 	  return 0;
 	}
 
-	//Ends
+	
 	if((width + (feature_patch_width / 2) >= image_width) ||
 		(height + (feature_patch_height / 2) >= image_height)) {
 	  return 0;
 	}
-	return 1;
+	return 1; //Checks all sides to see if the feature goes out of bounds. If not, return true.
 }
 
 
@@ -200,7 +202,7 @@ unsigned char *populate_feature_patch(int feature_patch_height,
 		allocation_failed();
 	
 	int height_offset, width_offset;
-    int counter = 0;
+        int counter = 0;
 
 	for(int i = 0; i < feature_patch_height; i++) {
 	    height_offset = image_width * i;
