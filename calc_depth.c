@@ -16,8 +16,6 @@ static unsigned char normalized_displacement(int dx, int dy,
     
 }
 
-static int offset_to_coord_x(int offset, int image_width);
-static int offset_to_coord_y(int offset, int image_width);
 static int coord_to_offset(int height, int width, int image_width);
 static int check_within_image(int height, int width, int feature_patch_width, int feature_height, int image_width, int image_height);
 static unsigned char *check_bounds(unsigned char *image, int height, int width, int feature_patch_width, int feature_height, int image_width, int image_height); 
@@ -25,17 +23,7 @@ static unsigned char *populate_feature_patch(int feature_patch_height, int featu
 static int squared_euclidean_distance(unsigned char *feature_patch_one, unsigned char *feature_patch_two, int feature_patch_width, int feature_height);
 static unsigned char scan_right_image(unsigned char *image, unsigned char *left_feature, int height, int width, int feature_height, int feature_patch_height, int image_width, int image_height, int max_displacement);
 
-
-
-int offset_to_coord_x(int offset, int image_width) {
-	return offset / image_width;
-}
-
-int offset_to_coord_y(int offset, int image_width) {
-	return offset % image_width;
-}
-
-int coord_to_offset(int height, int width, int image_width) {
+int coord_to_offset(int height, int width, int image_width) { //calculates the offset from the beginning of the image
 	return (height * image_width) + width;
 }
 
@@ -86,7 +74,7 @@ unsigned char *check_bounds(unsigned char *image,
 										width - (feature_patch_width / 2),
 										image_width); 
     
-	int within_image = check_within_image(height, width, feature_patch_width, feature_patch_height, image_width, image_height); //Will creating a feature centered around pixel at (height, width) work?
+	int within_image = check_within_image(height, width, feature_patch_width, feature_patch_height, image_width, image_height); //Checks if creating a feature centered around pixel at (height, width) work
 	return (within_image) ? populate_feature_patch(feature_patch_height, feature_patch_width, image_width, corner_offset, image) : NULL; //Create the feature if the feature is within bounds.
  }
 
