@@ -1,0 +1,11 @@
+Fill in your answers here.
+
+1. The algorithm does a remarkable job at identifying the post-it note in that a good majority of it is in the red region indicating that it is close by.. 
+However, parts of the sky is also in the red region. This is probably due to the fact that the sky is more or less a solid white, and therefore it is likely for some parts of the sky to have a pretty similar patch lying nearby. 
+
+2. The algorithm works signigicantly better on the real2 image. 
+A larger portion of the post-it note is in the red region, while the red region outside of the post-it note is smaller including the sky region. 
+This occurs as there are smaller patches of a solid color and more contrast, hence the algorithm is forced to actually match the pattern to find a similar patch, instead of being mostly subjected by probability. 
+
+3. The output images become more degraded as the feature sizes decrease and the "Cal" pattern becomes more faded. This occurs because the larger the feature sizes become, the less attention the program is paying towards detail. 
+Larger feature sizes means less computations for a fixed maximum displacement. However, this results in more pixels having to be matched in larger groups, and thus, cruder pictures and the blurring of details. 
