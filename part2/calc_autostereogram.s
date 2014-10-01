@@ -47,7 +47,7 @@ InnerForLoop:   	beq $t7, $s3, ExitHeight
 	and  $t9, $v0, $s4 #Get result from v0
 	sh $t9, 0($t1) #load 8 bit into autostereogram 
 	j InnerIn
-Else:  
+Else:
 	lh $t8, 0($t2) 
 	addu $t8, $t8, $t6
 	subu $t8, $t8, $s4
@@ -58,7 +58,7 @@ Else:
 	lh $t0, 0($t0) #Get stereo gram from position calculating above
 	sh $t0, 0($t1) #load it into current sterogram pointer 
 InnerIn:	addiu $t1,$t1,1 #increment stereo pointer by one byte
-		addiu $t2, $t2,1 #increment depth pointer as well for convienience 
+		addiu $t2, $t2,1 #increment depth pointer as well for convienience
 		addiu $t7,$t7,1 #increment j counter
 		j InnerForLoop 
 ExitHeight:
