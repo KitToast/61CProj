@@ -12,6 +12,9 @@ lfsr:
 # Arguments: None
 lfsr_random:
 
+	addiu $sp, $sp, -4
+	sw $s2, 0($sp)
+	
         la $t0 lfsr #Load inital 0x01 into $v0
         lhu $v0 0($t0)
         
@@ -38,4 +41,7 @@ Loop:	beq  $t8, $t9, End
 End:
         la $t0 lfsr #load $vo into $t0 again for return 
         sh $v0 0($t0)
+        
+        lw $s2 0($sp)
+        addiu $sp, $sp,4
         jr $ra
