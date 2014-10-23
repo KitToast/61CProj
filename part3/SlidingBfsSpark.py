@@ -1,13 +1,13 @@
 from pyspark import SparkContext
 import Sliding, argparse
 
-def bfs_map(value):
-    """ YOUR CODE HERE """
-    pass # delete this line
+def bfs_map(board):
+    if (board not in already_seen_set_broadcast.value):
+        return ( level, [board] )
 
-def bfs_reduce(value1, value2):
-    """ YOUR CODE HERE """
-    pass # delete this line
+
+def bfs_reduce(board1, board2):
+    return board1 + board2 #Combine sets  
 
 def solve_sliding_puzzle(master, output, height, width):
     """
@@ -22,21 +22,36 @@ def solve_sliding_puzzle(master, output, height, width):
 
     # Global constants that will be shared across all map and reduce instances.
     # You can also reference these in any helper functions you write.
-    global HEIGHT, WIDTH, level
+    global HEIGHT, WIDTH, level, already_seen_set_broadcast
 
     # Initialize global constants
     HEIGHT=height
     WIDTH=width
     level = 0 # this "constant" will change, but it remains constant for every MapReduce job
-
+    
     # The solution configuration for this sliding puzzle. You will begin exploring the tree from this node
-    sol = Sliding.solution(WIDTH, HEIGHT)
+    sol = list(Sliding.solution(WIDTH, HEIGHT))
 
+    #Create initial RDD from entry solution point
+    sol_rdd = sc.parallelize(sol)
+    #Initialization
+    already_seen_set = set() #Solution is already seen
+    already_seen_set_broadcast = sc.broadcast(already_seen_set)
+    current_lvl_dataset = sol_rdd
 
-    """ YOUR MAP REDUCE PROCESSING CODE HERE """
+    while level < 2: #Testing for only level 0 and 1. Onward will require a helper function dealing with Calling MapReduce with Sliding.children 
+        current_lvl_result = current_lvl_dataset.map(bfs_map).reduceByKey(bfs_reduce)
+        current_lvl_list = current_lvl_result.collect()
 
+        for result in current_lvl_list: #Bottleneck?
+            output(result)
 
-    """ YOUR OUTPUT CODE HERE """
+        already_seen_set.union(set(current_lvl_list[0][1])) #Update seen set
+        already_seen_set_broadcast = sc.broadcast(already_seen_set) #update broadcast
+   
+        children_boards = Sliding.children(HEIGHT, WIDTH , current_lvl_list[0][1]) #May have to move this to mapping portion or somehow make it parallel. Another MapReduce?
+        current_lvl_dataset = sc.parallelize(children_boards)
+        level += 1
 
     sc.stop()
 
