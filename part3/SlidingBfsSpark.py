@@ -1,17 +1,16 @@
 from pyspark import SparkContext
 import Sliding, argparse
 
-def bfs_map(board):
-    if (board not in already_seen_set_broadcast.value):
-        return ( level, [board] )
+def bfs_map(board_tup):
+    if (board_tup[1] not in already_seen_set_broadcast.value):
+        return ( level, [board_tup[1]] )
     return (level, [])
 
 def bfs_reduce(board1, board2):
-    if(len(board2) == 1 and board2[0] in board1): #Early duplicate checking when lists are only length one. Prevents further duplicate checking in iterative portion
-        return board1
-    elif(len(board1) == 1 and board1[0] in board2):
-        return board2
     return board1 + board2  
+
+def children_map(child):
+    return (level, child)
 
 def solve_sliding_puzzle(master, output, height, width):
     """
@@ -37,7 +36,7 @@ def solve_sliding_puzzle(master, output, height, width):
     # The solution configuration for this sliding puzzle. You will begin exploring the tree from this node
     sol = [Sliding.solution(WIDTH, HEIGHT)]
     #Create initial RDD from entry solution point
-    sol_rdd = sc.parallelize(sol)
+    sol_rdd = sc.parallelize(sol).map(children_map)
     #Initialization
     already_seen_set = set() #Solution is already seen
     already_seen_set_broadcast = sc.broadcast(already_seen_set)
@@ -58,14 +57,17 @@ def solve_sliding_puzzle(master, output, height, width):
 
         if(len(list_of_unique_children[1]) == 1 and not firstlevel):
             break
+
         already_seen_set = already_seen_set.union(set(list_of_unique_children[1])) #Update seen set
         already_seen_set_broadcast.unpersist(blocking = True) 
         already_seen_set_broadcast = sc.broadcast(already_seen_set) #update broadcast
 
         children_boards = []
         for board in list_of_unique_children[1]:
-            children_boards.extend(Sliding.children(WIDTH, HEIGHT , board)) #May have to move this to mapping portion or somehow make it parallel. Another MapReduce?
-        current_lvl_dataset = sc.parallelize(children_boards)
+            children_boards.extend(Sliding.children(WIDTH, HEIGHT, board)) #May have to move this to mapping portion or somehow make it parallel. Another MapReduce?
+        current_lvl_dataset = sc.parallelize(children_boards).distinct().map(children_map)
+        if (level % 8) == 0:
+            current_lvl_dataset = current_lvl_dataset.partitionBy(16)
         level += 1
         firstlevel = False
 
