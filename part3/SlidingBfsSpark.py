@@ -1,16 +1,24 @@
 from pyspark import SparkContext
 import Sliding, argparse
 
-def bfs_map(board_tup):
-    if (board_tup[1] not in already_seen_set_broadcast.value):
-        return ( level, [board_tup[1]] )
-    return (level, [])
 
-def bfs_reduce(board1, board2):
-    return board1 + board2  
+def bfs_reduce(level1, level2):    
+    return min(level1, level2)
 
-def children_map(child):
-    return (level, child)
+def bfs_flatmap(board):
+    if board[1] == (level - 1):
+        children_list = Sliding.children(WIDTH, HEIGHT, board[0])
+        level_list = [level for _ in range(len(children_list))]
+        children_list = zip(children_list, level_list)
+        children_list.append(board)
+        return children_list
+    return [board]
+
+def flip_map(board):
+    return (board[1], board[0])
+
+def flip_reduce(board1, board2):
+    return board1
 
 def solve_sliding_puzzle(master, output, height, width):
     """
@@ -25,61 +33,42 @@ def solve_sliding_puzzle(master, output, height, width):
 
     # Global constants that will be shared across all map and reduce instances.
     # You can also reference these in any helper functions you write.
-    global HEIGHT, WIDTH, level, already_seen_set_broadcast
+    global HEIGHT, WIDTH, level
 
     # Initialize global constants
     HEIGHT=height
     WIDTH=width
-    level = 0 # this "constant" will change, but it remains constant for every MapReduce job
-    
-    firstlevel = True;
+    level = 1 # this "constant" will change, but it remains constant for every MapReduce job
+
     # The solution configuration for this sliding puzzle. You will begin exploring the tree from this node
-    sol = [Sliding.solution(WIDTH, HEIGHT)]
-    #Create initial RDD from entry solution point
-    sol_rdd = sc.parallelize(sol).map(children_map)
-    #Initialization
-    already_seen_set = set() #Solution is already seen
-    already_seen_set_broadcast = sc.broadcast(already_seen_set)
-    current_lvl_dataset = sol_rdd
+    sol = [ ( Sliding.solution(WIDTH, HEIGHT), 0 ) ]
+    sol_rdd = sc.parallelize(sol)
+   
+    prev_lvl_count = 0
+    current_lvl_count = 1
+    current_lvl_rdd = sol_rdd
 
-    while True: #Testing for only level 0 and 1. Onward will require a helper function dealing with Calling MapReduce with Sliding.children 
-        current_lvl_result = current_lvl_dataset.map(bfs_map).reduceByKey(bfs_reduce)
-        current_lvl_list = current_lvl_result.collect()
-
-        for result in current_lvl_list: #Bottleneck and change to correct format
-            for board in current_lvl_list[0][1]:
-                output(str(result[0]) + " " + str(board))
-        
-        if(not current_lvl_list):
-            break
-
-        list_of_unique_children = current_lvl_list[0]
-
-        if(len(list_of_unique_children[1]) == 1 and not firstlevel):
-            break
-
-        already_seen_set = already_seen_set.union(set(list_of_unique_children[1])) #Update seen set
-        already_seen_set_broadcast.unpersist(blocking = True) 
-        already_seen_set_broadcast = sc.broadcast(already_seen_set) #update broadcast
-
-        children_boards = []
-        for board in list_of_unique_children[1]:
-            children_boards.extend(Sliding.children(WIDTH, HEIGHT, board)) #May have to move this to mapping portion or somehow make it parallel. Another MapReduce?
-        current_lvl_dataset = sc.parallelize(children_boards).distinct().map(children_map)
-        if (level % 8) == 0:
-            current_lvl_dataset = current_lvl_dataset.partitionBy(16)
+    """ YOUR MAP REDUCE PROCESSING CODE HERE """
+    while prev_lvl_count != current_lvl_count:
+        current_lvl_rdd = current_lvl_rdd.flatMap(bfs_flatmap).reduceByKey(bfs_reduce)
+        #print(current_lvl_rdd.collect())
+        prev_lvl_count = current_lvl_count
+        current_lvl_count = current_lvl_rdd.count()
         level += 1
-        firstlevel = False
+        if level % 8 == 0:
+            current_lvl_rdd = current_lvl_rdd.partitionBy(16)
 
-    sc.stop()
+    """ YOUR OUTPUT CODE HERE """
 
-
+    current_lvl_rdd = current_lvl_rdd.map(flip_map).sortByKey()
+    rdd_list = current_lvl_rdd.collect()
+    for board in rdd_list:
+        output(str(board[0]) + " " + str(board[1]))
 
 """ DO NOT EDIT PAST THIS LINE
 
 You are welcome to read through the following code, but you
-do not need to worry about understanding it.
-"""
+do not need to worry about understanding it. """
 
 def main():
     """
