@@ -1,0 +1,15 @@
+1. 
+Medium with 6 slaves took: 1 min 36 Sec.
+Medium with 12 Slaves took: 2 min 11 sec.
+Large with 12 slaves took: 1 hour 8 minutes 5 seconds.
+
+2. 
+For 6 instances, the mean processing rate was 0.2588098958 MB/s.
+For 12 instances, the mean processing rate was 0.1896622137 MB/s.
+
+3. The 12 instances case actually took longer than the 6 instances case, by a factor of 1.36. 
+Spark was not very good at parallelizing for this occasion, since it took more time for the 12 instances case than the 6 instances case.
+This is a case of weak scaling, since if it were a case of strong scaling, the 12 instances case 
+would have taken half the time it took for 6 instances case.
+4. Prices per GB for both medium cases was $2.74/GB. Price per GB for the large case was $0.36/GB. 
+5. We spent $2.72 for this project, resulting from 4 hours of usage, rounded up. 
