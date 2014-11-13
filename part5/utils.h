@@ -11,7 +11,7 @@ typedef struct
 
 typedef unsigned char byte;
 
-#define FLOATING_POINT_TOLERANCE 0.0001
+#define FLOATING_POINT_TOLERANCE 0.001
 
 // Call this function when a memory allocation fails: exits the program, returning -1.
 void allocationFailed();

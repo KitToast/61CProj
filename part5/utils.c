@@ -7,10 +7,6 @@
 
 #include "utils.h"
 
-typedef unsigned char byte;
-
-#define FLOATING_POINT_TOLERANCE 0.0001
-
 // Call this function when a memory allocation fails: exits the program, returning -1.
 void allocationFailed()
 {
@@ -21,16 +17,38 @@ void allocationFailed()
 // Fills dst with n random floats between 0 and 1.
 void fillRandomFloat(float* dst, size_t n)
 {
-	for (size_t i = 0; i < n; i++)
+	size_t begin = n;
+	while (begin >= n)
 	{
-		dst[i] = (float)rand() / (float)RAND_MAX;
+		begin = n * ((float)rand() / (float)RAND_MAX);
+	}
+
+	float current = ((float)rand() / (float)RAND_MAX);
+	float increase = 1.1 + 0.1 * ((float)rand() / (float)RAND_MAX);
+
+	for (size_t i = begin; i < n; i++)
+	{
+		dst[i] = current;
+		current += increase;
+		increase *= increase;
+	}
+
+	for (size_t i = 0; i < begin; i++)
+	{
+		dst[i] = current;
+		current += increase;
+		increase *= increase;
 	}
 }
 
 // Checks for floating point equality.
 bool floatEquals(float a, float b)
 {
-	if (abs(a - b) <= FLOATING_POINT_TOLERANCE)
+	if (a == INFINITY || b == INFINITY || a == -INFINITY || b == -INFINITY)
+	{
+		return false;
+	}
+	if (abs(a - b) <= FLOATING_POINT_TOLERANCE * (a + b))
 	{
 		return true;
 	}
@@ -110,7 +128,11 @@ Image loadImage(char *filename)
 	}
 
 	colorTable = (unsigned char *)malloc(sizeof(unsigned char)* colorTableSize);
-	fread(colorTable, sizeof(unsigned char), colorTableSize, f);
+	if (fread(colorTable, sizeof(unsigned char), colorTableSize, f) != colorTableSize)
+	{
+		printf("Error reading image file.\r\n");
+		exit(-1);
+	}
 
 	width = readInt(info + 0x12);
 	height = readInt(info + 0x16);
@@ -130,7 +152,11 @@ Image loadImage(char *filename)
 	// Load data from bottom to top
 	for (row = height - 1; row >= 0; row--)
 	{
-		fread(data + row * width, sizeof(unsigned char), width, f);
+		if (fread(data + row * width, sizeof(unsigned char), width, f) != width)
+		{
+			printf("Error reading image file.\r\n");
+			exit(-1);
+		}
 		if (rowPaddingPerRow > 0)
 		{
 			fseek(f, rowPaddingPerRow, SEEK_CUR);

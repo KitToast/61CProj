@@ -2,9 +2,11 @@
 
 #include <limits.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "calcDepthNaive.h"
+#include "utils.h"
 
 #define ABS(x) (((x) < 0) ? (-(x)) : (x))
 
@@ -67,7 +69,7 @@ void calcDepthNaive(float *depth, float *left, float *right, int imageWidth, int
 						}
 					}
 
-					if ((minimumSquaredDifference == -1) || ((minimumSquaredDifference == squaredDifference) && (displacementNaive(dx, dy) < displacementNaive(minimumDx, minimumDy))) || (minimumSquaredDifference > squaredDifference))
+					if ((minimumSquaredDifference == -1) || (floatEquals(minimumSquaredDifference, squaredDifference) && (displacementNaive(dx, dy) < displacementNaive(minimumDx, minimumDy))) || ((minimumSquaredDifference > squaredDifference) && !floatEquals(minimumSquaredDifference, squaredDifference)))
 					{
 						minimumSquaredDifference = squaredDifference;
 						minimumDx = dx;

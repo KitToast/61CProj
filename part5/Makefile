@@ -1,11 +1,11 @@
 BINARIES = benchmark check depthMap
 CC = gcc
-CFLAGS = -std=c99 -Wall
+CFLAGS = -std=c99 -Wall -msse4.2
 LFLAGS = -lm
 
-default: all_release
+default: clean all_release
 
-debug: all_debug
+debug: clean all_debug
 
 all: $(BINARIES)
 
