@@ -1,5 +1,6 @@
 // CS 61C Fall 2014 Project 3
 
+#include <limits.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -17,27 +18,9 @@ void allocationFailed()
 // Fills dst with n random floats between 0 and 1.
 void fillRandomFloat(float* dst, size_t n)
 {
-	size_t begin = n;
-	while (begin >= n)
+	for (size_t i = 0; i < n; i++)
 	{
-		begin = n * ((float)rand() / (float)RAND_MAX);
-	}
-
-	float current = ((float)rand() / (float)RAND_MAX);
-	float increase = 1.1 + 0.1 * ((float)rand() / (float)RAND_MAX);
-
-	for (size_t i = begin; i < n; i++)
-	{
-		dst[i] = current;
-		current += increase;
-		increase *= increase;
-	}
-
-	for (size_t i = 0; i < begin; i++)
-	{
-		dst[i] = current;
-		current += increase;
-		increase *= increase;
+		dst[i] = (int)((float)UCHAR_MAX * ((float)rand() / (float)RAND_MAX)) % UCHAR_MAX;
 	}
 }
 
@@ -60,7 +43,7 @@ void floatToChar(unsigned char* dst, const float* const src, size_t n, int maxim
 {
 	for (size_t i = 0; i < n; i++)
 	{
-		dst[i] = (unsigned char)round((float)255 * src[i] / sqrt(2 * maximumDisplacement * maximumDisplacement));
+		dst[i] = (unsigned char)round((float)UCHAR_MAX * src[i] / sqrt(2 * maximumDisplacement * maximumDisplacement));
 	}
 
 }
@@ -170,7 +153,20 @@ Image loadImage(char *filename)
 	return img;
 }
 
-// Prints a 2D array.
+// Prints a 2D float array.
+void printFloatImage(const float *data, int width, int height)
+{
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			printf("%04.4f ", data[y * width + x]);
+		}
+		printf("\r\n");
+	}
+}
+
+// Prints a 2D char array.
 void printImage(const unsigned char *data, int width, int height)
 {
 	for (int y = 0; y < height; y++)
