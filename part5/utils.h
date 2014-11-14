@@ -11,7 +11,7 @@ typedef struct
 
 typedef unsigned char byte;
 
-#define FLOATING_POINT_TOLERANCE 0.001
+#define FLOATING_POINT_TOLERANCE 0.0001
 
 // Call this function when a memory allocation fails: exits the program, returning -1.
 void allocationFailed();
@@ -31,7 +31,10 @@ void charToFloat(float* dst, const unsigned char* const src, size_t n);
 // Loads a bitmap file.
 Image loadImage(char *filename);
 
-// Prints a 2D array.
+// Prints a 2D float array.
+void printFloatImage(const float *data, int width, int height);
+
+// Prints a 2D char array.
 void printImage(const unsigned char *data, int width, int height);
 
 // Saves a grayscale bitmap image.
