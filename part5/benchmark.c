@@ -78,7 +78,7 @@ static bool benchmarkMatrix(int imageWidth, int imageHeight, int featureWidth, i
 
 	for (size_t i = 0; i < imageWidth * imageHeight; i++)
 	{
-		if (!floatEquals(depthNaive[i], depthOptimized[i]))
+		if (!floatsWithinTolerance(depthNaive[i], depthOptimized[i]))
 		{
 			free(left);
 			free(right);
@@ -120,12 +120,25 @@ int main(int argc, char** argv)
 
     srand(time(NULL));
 	
-	int tests[][5] = { { 100, 100, 4, 4, 6 }, { 200, 200, 4, 4, 6 }, { 300, 300, 4, 4, 6 }, { 400, 400, 4, 4, 6 }, { 500, 500, 4, 4, 6 }, { 200, 400, 3, 3, 7 } };
+	int tests[][5] = { { 100, 100, 4, 4, 6 }, { 200, 200, 4, 4, 6 }, { 300, 300, 4, 4, 6 }, { 400, 400, 4, 4, 6 }, { 500, 500, 4, 4, 6 } };
 
+	printf("Testing non-odd cases: \r\n");
 	for (int i = 0; i < ARRAY_SIZE(tests); i++)
 	{
-		printf("Testing %ix%i image, %ix%i feature, %i maximum diplacement... ", tests[i][0], tests[i][1], tests[i][2], tests[i][3], tests[i][4]);
+		printf("Testing %ix%i image, feature width %i, feature height %i, maximum diplacement %i... ", tests[i][0], tests[i][1], tests[i][2], tests[i][3], tests[i][4]);
 		if (!benchmarkMatrix(tests[i][0], tests[i][1], tests[i][2], tests[i][3], tests[i][4]))
+		{
+			printf("Error: optimized does not match naive.\r\n");
+			returnResult = -1;
+		}
+	}
+
+	printf("\r\nTesting odd cases: \r\n");
+	int oddTests[][5] = { { 200, 400, 3, 3, 7 }, { 400, 200, 4, 4, 7 }, { 301, 301, 4, 4, 7 }, { 401, 401, 4, 4, 4 } };
+	for (int i = 0; i < ARRAY_SIZE(oddTests); i++)
+	{
+		printf("Testing %ix%i image, feature width %i, feature height %i, maximum diplacement %i... ", oddTests[i][0], oddTests[i][1], oddTests[i][2], oddTests[i][3], oddTests[i][4]);
+		if (!benchmarkMatrix(oddTests[i][0], oddTests[i][1], oddTests[i][2], oddTests[i][3], oddTests[i][4]))
 		{
 			printf("Error: optimized does not match naive.\r\n");
 			returnResult = -1;

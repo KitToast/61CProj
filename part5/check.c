@@ -52,7 +52,7 @@ static bool testCalcDepth(int imageWidth, int imageHeight, int featureWidth, int
 
 	for (size_t i = 0; i < imageWidth * imageHeight; i++)
 	{
-		if (!floatEquals(depthNaive[i], depthOptimized[i]))
+		if (!floatsWithinTolerance(depthNaive[i], depthOptimized[i]))
 		{
 			free(leftImage);
 			free(rightImage);
@@ -70,7 +70,7 @@ static bool testCalcDepth(int imageWidth, int imageHeight, int featureWidth, int
 
 static bool testCalcDepthVerbose(int imageWidth, int imageHeight, int featureWidth, int featureHeight, int maximumDisplacement)
 {
-	printf("Testing on image dimensions %ix%i, feature dimensions %ix%i, and maximum displacement %i... ", imageWidth, imageHeight, featureWidth, featureHeight, maximumDisplacement);
+	printf("Testing %ix%i image, feature width %i, feature height %i, maximum diplacement %i... ", imageWidth, imageHeight, featureWidth, featureHeight, maximumDisplacement);
 	if (testCalcDepth(imageWidth, imageHeight, featureWidth, featureHeight, maximumDisplacement))
 	{
 		printf("Test success!\r\n");

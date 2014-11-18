@@ -20,7 +20,7 @@ void allocationFailed();
 void fillRandomFloat(float* dst, size_t n);
 
 // Checks for floating point equality.
-bool floatEquals(float a, float b);
+bool floatsWithinTolerance(float a, float b);
 
 // Converts a float array to a normalized char array.
 void floatToChar(unsigned char* dst, const float* const src, size_t n, int maximumDisplacement);

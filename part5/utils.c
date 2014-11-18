@@ -25,13 +25,13 @@ void fillRandomFloat(float* dst, size_t n)
 }
 
 // Checks for floating point equality.
-bool floatEquals(float a, float b)
+bool floatsWithinTolerance(float a, float b)
 {
 	if (a == INFINITY || b == INFINITY || a == -INFINITY || b == -INFINITY)
 	{
 		return false;
 	}
-	if (abs(a - b) <= FLOATING_POINT_TOLERANCE * (a + b))
+	if (abs(a - b) <= FLOATING_POINT_TOLERANCE)
 	{
 		return true;
 	}

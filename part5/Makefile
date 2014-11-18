@@ -1,6 +1,6 @@
 BINARIES = benchmark check depthMap
 CC = gcc
-CFLAGS = -std=c99 -Wall -msse4.2
+CFLAGS = -std=c99 -Wall -march=corei7 -maes -mpclmul -mpopcnt
 LFLAGS = -lm
 
 default: clean all_release
@@ -9,7 +9,7 @@ debug: clean all_debug
 
 all: $(BINARIES)
 
-all_debug: CC += -DDEBUG -g
+all_debug: CC += -DDEBUG -ggdb3
 all_debug: all
 
 all_release: CC += -O3 -DNDEBUG -g0
