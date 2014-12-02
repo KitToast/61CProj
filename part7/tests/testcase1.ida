@@ -2,3 +2,45 @@
     # TEST CASE 1
     # YOUR TEST CASE GOES HERE
     #
+  
+  
+    # ADD INSTRUCTIONS #
+    add $t1 $0 $0
+    add $t2 $t1 $0 #testing registers
+    
+    add $t3 $0 5
+    add $t4 $t3 8 #testing immediates
+    
+    add $t4 $t3 -5
+   
+    # SUB INSTRUCTIONS #
+
+    sub $t2 $t1 $0 #testing registers
+    sub $t5 $t3 $t2 
+    
+    sub $t3 $0 -5
+    sub $t4 $t3 -8 #testing immediates
+    
+    #MULTIPLY INSTRUCTIONS #
+    
+    mul $t6 $0 $0
+    mul $t7 $t5 $t4 #Testing registers
+    
+    mul $t8 $t4 0 
+    mul $t8 $t4 -0
+    
+    mul $t9 $t4 6
+    mul $t9 $t5 -8
+    
+    #DIVIDE INSTRUCTIONS #
+    
+    div $0 $0 $0
+    
+    add $t5 $0 -1 #Negative case
+    div $t11 $t5 $0
+    
+    add $t6 $0 1 #Positive case
+    div $t12 $t6 $0
+    
+    div $t12 $t4 5 #Immediate cases
+    div $t12 $t4 -6

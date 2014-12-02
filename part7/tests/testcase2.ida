@@ -2,3 +2,45 @@
     # TEST CASE 2
     # YOUR TEST CASE GOES HERE
     #
+
+    #LEFT SHIFT INSTRUCTIONS#
+    
+    add $t5 $0 5
+    sl $t1 $0 $t5 #check trivial cases
+    add $t5 $0 3
+    sl $t2 $0 $5 #smear ones
+		
+    sl $t7 $t5 $t5 # Shift 5 left 5 places.
+    add $t6 $0 -3
+    sl $t7 $t5 $t6
+    
+    add $t6 $0 31
+    sl $t7 $t5 $t6
+    
+    #RIGHT SHIFT INSTRUCTIONS#
+    
+
+    #LOGICAL INSTRUCTIONS#
+    
+    or $t8 $t2 -67
+    
+    and $t7 $t0 4
+    and $t7 $t0 -3
+    
+    and $t7 $t0 $t5
+    and $t7 $t0 $0
+    
+    xor $t7 $t0 4
+    xor $t7 $t0 -3 
+    
+    # REVERSE INSTRUCTIONS #
+    
+    add $t6 $0 56
+    rev $t8 $t6 31
+    rev $t8 $t6 -16
+    
+    rev $t8 $t6 $0
+    
+    
+    
+    
