@@ -2,3 +2,28 @@
     # TEST CASE 3
     # YOUR TEST CASE GOES HERE
     #
+
+    #LOAD HALF WORD#
+
+    LH $t0 $t2($t3)
+    LH $t8 24($t1)
+
+    #STORE HALF WORD#
+
+    SH $t10 $t5($t6)
+    SH $t16 -8($t7)
+
+    #LOAD WORD#
+
+    LW $ra $t2($t12)
+    LW $t6 32($t7)
+
+    #STORE WORD#
+
+    SW $t6 $t5($t6)
+    SW $t9 40($t9)
+
+    #SET UPPER#
+    
+    STU $t6 $t8 $t11
+    STU $t9 $t0 $t0

@@ -19,6 +19,8 @@
     
     #RIGHT SHIFT INSTRUCTIONS#
     
+    sr $t5 $t7 $t6
+    sr $t7 $t6 22
 
     #LOGICAL INSTRUCTIONS#
     
