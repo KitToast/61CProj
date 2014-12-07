@@ -1,0 +1,24 @@
+    #
+    # TEST CASE 4
+    # YOUR TEST CASE GOES HERE
+    #
+
+    #JUMP#
+
+    J @GOTO
+
+    #JUMP IF GREATER THAN ZERO#
+
+GOTO:
+    ADD $jc $t0 $t0
+    JGT @HERE
+
+    #JUMP IF EQUAL TO ZERO#
+
+HERE:
+    SUB $jc $t0 $t0
+    JEQ @END
+    ADD $jc $t1 400
+    JEQ @END
+
+END:
