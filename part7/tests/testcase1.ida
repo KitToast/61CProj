@@ -35,6 +35,10 @@
     #DIVIDE INSTRUCTIONS #
     
     div $0 $0 $0
+
+    add $t15 $0 $4
+    div $t15 $t15 $0
+    
     
     add $t5 $0 -1 #Negative case
     div $t11 $t5 $0
@@ -44,3 +48,33 @@
     
     div $t12 $t4 5 #Immediate cases
     div $t12 $t4 -6
+
+    #MORE MISC. TESTS#
+
+    add $t1 $0 50 #put 50 into t1
+    add $t2 $0 50 
+ 
+    sh $t1 0($t2) #Testing basic halfword storing and loading for immediates
+    lh $t3 0($t2)
+ 
+    sub $t4 $t1 -50 #Immediates other than 0
+    sh $t4 50($t2)
+    lh $t5 50($t2)
+ 
+    sw $t5 0($t2) #Test word-aligned addresses
+    lw $t6 0($t2)
+ 
+    add $t6 $0 600
+    sw $t6 49($t2) #Test non-word-aligned addresses
+    lw $t7 49($t2)
+ 
+    add $t8 $0 77 #more of the same
+    add $t9 $0 65535
+ 
+    sw $t9 0($t8)
+    lw $t10 0($t8)
+ 
+    add $t9 $0 65536
+ 
+    sw $t9 0($t8) #Wrap around 2's complement
+    lw $t10 0($t8)
