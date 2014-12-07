@@ -4,21 +4,25 @@
     #
 
     #JUMP#
-
     J @GOTO
 
     #JUMP IF GREATER THAN ZERO#
-
 GOTO:
     ADD $jc $t0 $t0
     JGT @HERE
 
     #JUMP IF EQUAL TO ZERO#
-
 HERE:
-    SUB $jc $t0 $t0
-    JEQ @END
     ADD $jc $t1 400
-    JEQ @END
+    JEQ @NEXT
+    SUB $jc $t0 $t0
+    JEQ @NEXT
 
-END:
+    #JLT#
+NEXT:
+    ADD $jc $zero 8
+    JLT @END
+    SUB $jc $jc 100
+    JLT @END
+
+END:    

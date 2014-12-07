@@ -2,3 +2,31 @@
     # TEST CASE 5
     # YOUR TEST CASE GOES HERE
     #
+
+    #JLE#
+LTE: 
+    ADD $jc $zero 4
+    JLE @NEZ
+    ADD $jc $jc 4
+    JLE @NEZ
+
+    #JNE#
+NEZ: 
+    JNE @GTE
+    ADD $jc $jc 4
+    JNE @GTE
+
+    #JGE#
+GTE:
+    SUB $jc $jc 100
+    JGE @LINK
+    ADD $jc $jc 1000
+    JGE @LINK
+
+LINK:
+    JAL 0x000018
+    JAL @END
+
+MISC: 
+    J @END
+END:
