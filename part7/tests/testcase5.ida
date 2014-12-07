@@ -4,6 +4,14 @@
     #
 
     #JLE#
+
+stu $t0 $0 0x15555
+or $t0 $t0 0x2aaa
+rev $t1 $t0 1
+rev $t2 $t0 2
+rev $t3 $t0 3
+rev $t4 $t0 31
+ 
 LTE: 
     ADD $jc $zero 4
     JLE @NEZ
@@ -24,7 +32,6 @@ GTE:
     JGE @LINK
 
 LINK:
-    JAL 0x000018
     JAL @END
 
 MISC: 

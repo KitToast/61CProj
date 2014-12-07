@@ -34,15 +34,15 @@
     
     #DIVIDE INSTRUCTIONS #
     
-    div $0 $0 $0
+    div $0 $0 $0 #zero divided by zero
 
-    add $t15 $0 $4
+    add $t15 $0 4
     add $t16 $0 -4
-    add $t17 $t17 4
-    div $t15 $t15 $0
-    div $t16 $t16 $0
-    div $t15 $t15 $t17
-    div $t16 $t16 $t17
+    add $t17 $0 4 
+    div $t15 $t15 $0 #positive divided by zero
+    div $t16 $t16 $0 #negative divided by zero
+    div $t15 $t15 $t17 #positive infty divided by positive
+    div $t16 $t16 $t17 #negative infty divided by positive
     
     add $t5 $0 -1 #Negative case
     div $t11 $t5 $0
