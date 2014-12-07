@@ -4,7 +4,11 @@
     #
 
     #LOAD HALF WORD#
-
+    
+    ADD $t3 $zero 0x1144
+    ADD $t2 $0 $0
+    ADD $t12 $0 2288
+    SH $t12 $0($t3)
     LH $t0 $t2($t3)
     LH $t8 24($t1)
 
@@ -25,5 +29,5 @@
 
     #SET UPPER#
     
-    STU $t6 $t8 $t11
+    STU $t8 $t6 $t11
     STU $t9 $t0 $t0
