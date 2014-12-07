@@ -82,3 +82,20 @@
  
     sw $t9 0($t8) #Wrap around 2's complement
     lw $t10 0($t8)
+add $t5 $0 35 #35 iterations
+add $t6 $0 $0 #Counter
+
+RECURSE:
+sub $sp $sp 2
+sw $ra 0($sp)
+
+add $t6 $t6 $t5
+sub $jc $t5 0
+jeq @END 
+    sub $t5 $t5 1
+    jal @RECURSE
+
+END:
+    lw $ra 0($sp)
+    add $sp $sp 2
+    j $ra

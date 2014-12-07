@@ -1,8 +1,0 @@
-
-add $jc $0 34
-
-LOOP: jeq @END
-      sub $jc $jc 1
-      j @LOOP
-END:
-   
