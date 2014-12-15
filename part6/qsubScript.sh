@@ -21,3 +21,4 @@ export GOTOBLAS_MAIN_FREE=1
 
 # name of the file to execute
 ./benchmark > bench-output.txt
+
